@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.lumadoc/
+*.log
+.env
+.env.local
+

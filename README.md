@@ -1,24 +1,29 @@
 # liteip-graph
 
-Self-hosted Neo4j with Graph Data Science (GDS) library on Cloudflare.
+Self-hosted Neo4j with Graph Data Science (GDS) library, AI chatbot, and static documentation site on Cloudflare.
 
 ## Features
 
-- Neo4j 5 Community Edition
-- Graph Data Science (GDS) library for graph algorithms and analytics
+- **Neo4j 5 Community Edition** with Graph Data Science (GDS) library
+- **AI Chatbot** powered by Cloudflare Workers and AI SDK
+- **Static Documentation Site** built with Lumadoc
 - APOC plugin for extended functionality
 - Long-lived container deployment optimized for Cloudflare
 - Docker Compose setup for local development
-- CI/CD pipeline for Cloudflare container hosting
+- Complete CI/CD pipeline for all components
 
 ## Setup
 
 ### Prerequisites
 
-- Docker and Docker Compose
+- Docker and Docker Compose (for Neo4j)
+- Node.js 20+ (for Worker and Site)
 - GitHub Actions secrets configured:
   - `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare Account ID
-  - `CLOUDFLARE_API_TOKEN`: Cloudflare API token with container registry permissions
+  - `CLOUDFLARE_API_TOKEN`: Cloudflare API token with:
+    - Container registry permissions
+    - Workers deployment permissions
+    - Pages deployment permissions
 
 ### GitHub Secrets Configuration
 
@@ -99,12 +104,56 @@ Or in Neo4j Browser (http://localhost:7474):
 CALL gds.version() YIELD version RETURN version;
 ```
 
+### AI Chatbot Worker
+
+The project includes a Cloudflare Worker with an AI chatbot using Cloudflare's AI SDK.
+
+#### Local Development
+
+```bash
+cd worker
+npm install
+npm run dev
+```
+
+#### Deploy Worker
+
+```bash
+cd worker
+npm run deploy
+```
+
+The worker provides a REST API endpoint for chat interactions. See `worker/src/index.ts` for implementation details.
+
+### Static Site (Lumadoc)
+
+The project includes a static documentation site built with Lumadoc.
+
+#### Local Development
+
+```bash
+cd site
+npm install
+npm run dev
+```
+
+#### Build and Deploy
+
+```bash
+cd site
+npm run build
+# Deploy dist/ to Cloudflare Pages
+```
+
 ### CI/CD
 
-The GitHub Actions workflow will:
-- Build Docker images with Neo4j + GDS on every push and pull request
-- Push images to Cloudflare Container Registry on pushes to main/develop branches
-- Deploy Neo4j + GDS container to Cloudflare Workers for Platforms
+The GitHub Actions workflow automatically:
+
+1. **Neo4j Container**: Builds and pushes Docker images with Neo4j + GDS to Cloudflare Container Registry
+2. **AI Chatbot Worker**: Deploys the Cloudflare Worker with AI SDK
+3. **Static Site**: Builds and deploys the Lumadoc static site to Cloudflare Pages
+
+All components deploy on pushes to `main` or `develop` branches.
 
 ### Graph Data Science (GDS)
 
@@ -137,13 +186,22 @@ ORDER BY score DESC;
 ├── .github/
 │   └── workflows/
 │       └── ci-cd.yml      # GitHub Actions CI/CD workflow
-├── Dockerfile             # Neo4j container definition
-├── docker-compose.yml     # Local development setup
-├── neo4j.conf            # Neo4j configuration
-├── env.example           # Environment variables template
-├── .dockerignore         # Files to exclude from Docker build
-├── .gitignore           # Git ignore rules
-└── README.md            # This file
+├── worker/               # Cloudflare Worker (AI Chatbot)
+│   ├── src/
+│   │   └── index.ts      # Worker entry point
+│   ├── wrangler.toml     # Worker configuration
+│   └── package.json      # Worker dependencies
+├── site/                 # Lumadoc static site
+│   ├── src/              # Markdown source files
+│   ├── lumadoc.config.ts # Lumadoc configuration
+│   └── package.json      # Site dependencies
+├── Dockerfile            # Neo4j container definition
+├── docker-compose.yml    # Local development setup
+├── neo4j.conf           # Neo4j configuration
+├── env.example          # Environment variables template
+├── .dockerignore        # Files to exclude from Docker build
+├── .gitignore          # Git ignore rules
+└── README.md           # This file
 ```
 
 ## Configuration

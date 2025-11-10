@@ -1,0 +1,22 @@
+{
+  "name": "liteip-graph-site",
+  "version": "1.0.0",
+  "description": "Static site for liteip-graph built with Lumadoc",
+  "type": "module",
+  "scripts": {
+    "dev": "lumadoc dev",
+    "build": "lumadoc build",
+    "preview": "lumadoc preview"
+  },
+  "keywords": [
+    "lumadoc",
+    "static-site",
+    "documentation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "lumadoc": "^0.1.0"
+  }
+}
+

@@ -12,9 +12,11 @@ on:
 env:
   REGISTRY: registry.workers.dev
   IMAGE_NAME: ${{ github.repository }}
+  NODE_VERSION: '20'
 
 jobs:
-  build-and-deploy:
+  # Build and deploy Neo4j container
+  deploy-neo4j:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,14 +59,73 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Deploy to Cloudflare Workers for Platforms
+      - name: Deploy Neo4j container to Cloudflare
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
         run: |
           echo "Deploying Neo4j + GDS container to Cloudflare..."
           echo "Container image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}"
           # For long-lived containers with Neo4j + GDS, deploy to Cloudflare's container runtime
           # Ensure sufficient memory allocation (4GB+ recommended for GDS)
-          # Example deployment commands:
-          # wrangler deploy --compatibility-date=2024-01-01
-          # or use Cloudflare's container deployment API
+
+  # Deploy Cloudflare Worker (AI Chatbot)
+  deploy-worker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Worker dependencies
+        working-directory: ./worker
+        run: npm ci
+
+      - name: Deploy Worker to Cloudflare
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        working-directory: ./worker
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  # Build and deploy static site (Lumadoc)
+  deploy-site:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install site dependencies
+        working-directory: ./site
+        run: npm ci
+
+      - name: Build static site
+        working-directory: ./site
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: liteip-graph-site
+          directory: ./site/dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 

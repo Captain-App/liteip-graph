@@ -29,6 +29,14 @@ build/
 *.egg-info/
 .eggs/
 
+# Worker and Site build outputs
+worker/node_modules/
+worker/.wrangler/
+worker/dist/
+site/node_modules/
+site/dist/
+site/.lumadoc/
+
 # Environment variables
 .env
 .env.local
