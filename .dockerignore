@@ -20,15 +20,28 @@ README.md
 .DS_Store
 Thumbs.db
 
+# Environment files
+.env
+.env.local
+env.example
+
+# Docker
+docker-compose.yml
+docker-compose.*.yml
+
 # Dependencies (uncomment based on your stack)
 # node_modules
 # __pycache__
 # *.pyc
 # venv
-# .env
 
 # Build artifacts
 dist
 build
 *.log
+
+# Neo4j data (should be in volumes, not in image)
+data/
+logs/
+import/
 
