@@ -60,10 +60,10 @@ jobs:
       - name: Deploy to Cloudflare Workers for Platforms
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
         run: |
-          echo "Deploying Neo4j container to Cloudflare..."
+          echo "Deploying Neo4j + GDS container to Cloudflare..."
           echo "Container image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}"
-          # For long-lived containers, you may need to deploy to Cloudflare's container runtime
-          # or use Cloudflare Workers for Platforms with container support
+          # For long-lived containers with Neo4j + GDS, deploy to Cloudflare's container runtime
+          # Ensure sufficient memory allocation (4GB+ recommended for GDS)
           # Example deployment commands:
           # wrangler deploy --compatibility-date=2024-01-01
           # or use Cloudflare's container deployment API
